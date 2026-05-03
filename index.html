@@ -6,6 +6,8 @@
 <title>Skytta — Exploring the Limits of Possibility</title>
 <meta name="description" content="Tony Skytta — Builder, Founder, Creator. Blueprint Hub, DCSites, Appytta. Exploring the limits of possibility."/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -113,6 +115,119 @@ section{padding:120px 48px;}
 footer{padding:32px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 footer p{color:var(--gray);font-size:0.75rem;letter-spacing:1px;}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--gray);}
+
+/* ── 3D SCROLL OBJECT ── */
+.object-section{
+  height:400vh;
+  position:relative;
+  background:var(--black);
+}
+.object-sticky{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.object-scene{
+  perspective:1200px;
+  width:340px;
+  height:340px;
+  position:relative;
+}
+.object-3d{
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transform:rotateX(20deg) rotateY(0deg);
+}
+
+/* Rings */
+.ring{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(37,99,235,0.4);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:ringPulse 3s ease-in-out infinite;
+}
+.ring-1{width:340px;height:340px;animation-delay:0s;border-color:rgba(37,99,235,0.5);}
+.ring-2{width:260px;height:260px;animation-delay:0.5s;border-color:rgba(6,182,212,0.4);}
+.ring-3{width:180px;height:180px;animation-delay:1s;border-color:rgba(37,99,235,0.6);}
+@keyframes ringPulse{
+  0%,100%{opacity:0.3;transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:0.8;transform:translate(-50%,-50%) scale(1.03);}
+}
+
+/* Core cube faces */
+.hex-wrap{
+  position:absolute;
+  width:120px;height:120px;
+  top:50%;left:50%;
+  transform-style:preserve-3d;
+  transform:translate(-50%,-50%);
+}
+.hex-face{
+  position:absolute;
+  width:120px;height:120px;
+  background:linear-gradient(135deg,rgba(37,99,235,0.15),rgba(6,182,212,0.08));
+  border:1px solid rgba(37,99,235,0.4);
+  backface-visibility:visible;
+}
+.face-front{transform:translateZ(60px);}
+.face-back{transform:translateZ(-60px) rotateY(180deg);}
+.face-top{transform:rotateX(90deg) translateZ(60px);}
+.face-bottom{transform:rotateX(-90deg) translateZ(60px);}
+.face-left{transform:rotateY(-90deg) translateZ(60px);}
+.face-right{transform:rotateY(90deg) translateZ(60px);}
+
+/* Particles */
+.particle{
+  position:absolute;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--blue-glow);
+  box-shadow:0 0 10px var(--blue-glow);
+  top:50%;left:50%;
+}
+.p1{animation:orbit1 4s linear infinite;}
+.p2{animation:orbit2 6s linear infinite;}
+.p3{animation:orbit3 5s linear infinite;}
+.p4{animation:orbit4 7s linear infinite;}
+@keyframes orbit1{from{transform:translate(-50%,-50%) rotate(0deg) translateX(160px)} to{transform:translate(-50%,-50%) rotate(360deg) translateX(160px)}}
+@keyframes orbit2{from{transform:translate(-50%,-50%) rotate(90deg) translateX(130px)} to{transform:translate(-50%,-50%) rotate(450deg) translateX(130px)}}
+@keyframes orbit3{from{transform:translate(-50%,-50%) rotate(180deg) translateX(170px) rotateY(45deg)} to{transform:translate(-50%,-50%) rotate(540deg) translateX(170px) rotateY(45deg)}}
+@keyframes orbit4{from{transform:translate(-50%,-50%) rotate(270deg) translateX(120px)} to{transform:translate(-50%,-50%) rotate(630deg) translateX(120px)}}
+
+/* Glow core */
+.core-glow{
+  position:absolute;
+  width:60px;height:60px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(37,99,235,0.6),transparent 70%);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:corePulse 2s ease-in-out infinite;
+}
+@keyframes corePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.4);}}
+
+/* Object text panels */
+.object-text{
+  position:absolute;
+  right:10%;
+  max-width:280px;
+  opacity:0;
+  transform:translateX(40px);
+  transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+  pointer-events:none;
+}
+.object-text.visible{opacity:1;transform:translateX(0);}
+.obj-label{font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--blue-glow);margin-bottom:12px;}
+.object-text h3{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:3px;line-height:1;margin-bottom:12px;color:var(--white);}
+.object-text p{color:var(--gray);font-size:0.9rem;line-height:1.7;}
 
 /* ── ANIMATIONS ── */
 
@@ -235,6 +350,52 @@ section::before{
   <div class="hero-scroll">
     <div class="hero-scroll-line"></div>
     Scroll
+  </div>
+</section>
+
+<!-- 3D SCROLL OBJECT -->
+<section class="object-section" id="object-section">
+  <div class="object-sticky">
+    <div class="object-scene">
+      <div class="object-3d" id="object3d">
+        <!-- Outer ring -->
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <!-- Core hexagon faces -->
+        <div class="hex-wrap">
+          <div class="hex-face face-front"></div>
+          <div class="hex-face face-back"></div>
+          <div class="hex-face face-top"></div>
+          <div class="hex-face face-bottom"></div>
+          <div class="hex-face face-left"></div>
+          <div class="hex-face face-right"></div>
+        </div>
+        <!-- Orbiting particles -->
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+        <div class="particle p4"></div>
+        <!-- Glow core -->
+        <div class="core-glow"></div>
+      </div>
+    </div>
+    <!-- Text that appears alongside object as you scroll -->
+    <div class="object-text" id="obj-text-1">
+      <div class="obj-label">Phase 01</div>
+      <h3>The Idea</h3>
+      <p>Every build starts with a problem worth solving.</p>
+    </div>
+    <div class="object-text" id="obj-text-2">
+      <div class="obj-label">Phase 02</div>
+      <h3>The Build</h3>
+      <p>Code, design, and systems assembled from nothing.</p>
+    </div>
+    <div class="object-text" id="obj-text-3">
+      <div class="obj-label">Phase 03</div>
+      <h3>The Launch</h3>
+      <p>Live products. Real users. Measurable impact.</p>
+    </div>
   </div>
 </section>
 
@@ -561,6 +722,79 @@ function initHorizontalScroll(){
   });
 }
 
+// ── GSAP 3D SCROLL OBJECT ────────────────────────────────────────────────────
+function initScrollObject(){
+  if(typeof gsap === 'undefined') return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  const obj = document.getElementById('object3d');
+  const hexWrap = obj?.querySelector('.hex-wrap');
+  const section = document.getElementById('object-section');
+  if(!obj || !section) return;
+
+  // Rotate the outer object as you scroll
+  gsap.to(obj, {
+    rotateY: 360,
+    rotateX: 20,
+    scrollTrigger: {
+      trigger: section,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 2,
+    }
+  });
+
+  // Rotate the inner cube independently
+  if(hexWrap){
+    gsap.to(hexWrap, {
+      rotateY: 720,
+      rotateX: 360,
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 3,
+      }
+    });
+  }
+
+  // Scale in the object on entry
+  gsap.fromTo(obj,
+    { scale: 0.3, opacity: 0 },
+    {
+      scale: 1, opacity: 1, duration: 1.5, ease: 'back.out(1.7)',
+      scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none reverse' }
+    }
+  );
+
+  // Text panels appear at different scroll points
+  const texts = [
+    { id: 'obj-text-1', start: '5%', end: '30%' },
+    { id: 'obj-text-2', start: '33%', end: '60%' },
+    { id: 'obj-text-3', start: '63%', end: '90%' },
+  ];
+
+  texts.forEach(t => {
+    const el = document.getElementById(t.id);
+    if(!el) return;
+    ScrollTrigger.create({
+      trigger: section,
+      start: `top+=${parseFloat(t.start)/100 * section.offsetHeight} top`,
+      end: `top+=${parseFloat(t.end)/100 * section.offsetHeight} top`,
+      onEnter: () => el.classList.add('visible'),
+      onLeave: () => el.classList.remove('visible'),
+      onEnterBack: () => el.classList.add('visible'),
+      onLeaveBack: () => el.classList.remove('visible'),
+    });
+  });
+
+  // Rings expand on scroll
+  gsap.to('.ring-1', {
+    scale: 1.3, opacity: 0.1,
+    scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: 1 }
+  });
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // Fade reveal for sections
@@ -591,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initHorizontalScroll();
+  initScrollObject();
 });
 </script>
 </body>
