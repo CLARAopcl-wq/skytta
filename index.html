@@ -114,6 +114,89 @@ footer{padding:32px 48px;border-top:1px solid var(--border);display:flex;align-i
 footer p{color:var(--gray);font-size:0.75rem;letter-spacing:1px;}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--gray);}
 
+/* ── ANIMATIONS ── */
+
+/* Hero entrance */
+.hero-tag, .hero-name, .hero-tagline, .hero-scroll{
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+.hero-in{opacity:1 !important;transform:translateY(0) !important;}
+
+/* Scroll reveal — fade up */
+.reveal{
+  opacity:0;
+  transform:translateY(40px);
+  transition:opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.is-visible{opacity:1;transform:translateY(0);}
+
+/* Stagger children */
+.reveal-child{
+  opacity:0;
+  transform:translateY(30px) scale(0.98);
+  transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-child.is-visible{opacity:1;transform:translateY(0) scale(1);}
+
+/* Section label reveal */
+.section-label{
+  overflow:hidden;
+  clip-path:inset(0 100% 0 0);
+  transition:clip-path 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.section-label.is-visible, section:hover .section-label{clip-path:inset(0 0% 0 0);}
+
+/* Section titles — wipe in from left */
+.section-title{
+  clip-path:inset(0 100% 0 0);
+  transition:clip-path 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.section-title.is-visible{clip-path:inset(0 0% 0 0);}
+
+/* Letter by letter */
+.char{
+  display:inline-block;
+  opacity:0;
+  transform:translateY(20px);
+  animation:charIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes charIn{
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* Counter reveal */
+.count-reveal{
+  animation:countIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes countIn{
+  from{opacity:0;transform:scale(0.8);}
+  to{opacity:1;transform:scale(1);}
+}
+
+/* Parallax hero BG — already scaled in HTML, needs initial state */
+.hero-bg{
+  transform-origin:center center;
+  will-change:transform;
+}
+
+/* Section divider line animation */
+section::before{
+  content:'';
+  display:block;
+  width:0;
+  height:1px;
+  background:linear-gradient(to right,var(--blue-glow),transparent);
+  transition:width 1.5s cubic-bezier(0.16,1,0.3,1);
+  margin-bottom:0;
+}
+
+/* Card hover — enhanced */
+.skill-card:hover, .project-card:hover{
+  box-shadow:0 0 30px rgba(37,99,235,0.12);
+}
+
 /* ── MOBILE ── */
 @media(max-width:768px){
   nav{padding:20px 24px;}
@@ -169,19 +252,19 @@ footer p{color:var(--gray);font-size:0.75rem;letter-spacing:1px;}
       </div>
       <div class="story-stats">
         <div class="stat-card">
-          <div class="stat-num">3+</div>
+          <div class="stat-num" data-count="3" data-suffix="+">0+</div>
           <div class="stat-label">Products Built</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">5+</div>
+          <div class="stat-num" data-count="5" data-suffix="+">0+</div>
           <div class="stat-label">Client Sites Live</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">AI</div>
+          <div class="stat-num" data-count="AI">AI</div>
           <div class="stat-label">Powered Systems</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">0→1</div>
+          <div class="stat-num" data-count="0→1">0→1</div>
           <div class="stat-label">Every Time</div>
         </div>
       </div>
@@ -378,23 +461,136 @@ footer p{color:var(--gray);font-size:0.75rem;letter-spacing:1px;}
 </footer>
 
 <script>
-// Nav scroll effect
+// ── NAV SCROLL ────────────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+  parallax();
+  counterAnimation();
 });
 
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
+// ── PARALLAX HERO ─────────────────────────────────────────────────────────────
+function parallax(){
+  const scrollY = window.scrollY;
+  const heroBg = document.querySelector('.hero-bg');
+  const heroContent = document.querySelector('.hero-content');
+  if(heroBg) heroBg.style.transform = `translateY(${scrollY * 0.4}px) scale(1.1)`;
+  if(heroContent) heroContent.style.transform = `translateY(${scrollY * 0.15}px)`;
+  if(heroContent) heroContent.style.opacity = Math.max(0, 1 - scrollY / 600);
+}
+
+// ── TEXT REVEAL — letter by letter ────────────────────────────────────────────
+function splitTextReveal(el){
+  const text = el.textContent;
+  el.innerHTML = text.split('').map((char, i) =>
+    `<span class="char" style="animation-delay:${i * 0.04}s">${char === ' ' ? '&nbsp;' : char}</span>`
+  ).join('');
+  el.classList.add('revealed');
+}
+
+// ── SCROLL REVEAL OBSERVER ────────────────────────────────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
+    if(!e.isIntersecting) return;
+    const el = e.target;
+    const delay = el.dataset.delay || 0;
+    setTimeout(() => {
+      el.classList.add('is-visible');
+      if(el.dataset.reveal === 'text') splitTextReveal(el);
+    }, delay * 1000);
+    revealObserver.unobserve(el);
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+// ── STAGGER REVEAL ────────────────────────────────────────────────────────────
+const staggerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(!e.isIntersecting) return;
+    const parent = e.target;
+    const children = parent.querySelectorAll('.reveal-child');
+    children.forEach((child, i) => {
+      setTimeout(() => child.classList.add('is-visible'), i * 120);
+    });
+    staggerObserver.unobserve(parent);
   });
 }, { threshold: 0.1 });
 
-document.querySelectorAll('.skill-card, .project-card, .stat-card, .venture-card').forEach(el => {
-  el.style.opacity='0';
-  el.style.transform='translateY(30px)';
-  el.style.transition='opacity 0.6s ease, transform 0.6s ease';
-  observer.observe(el);
+// ── COUNTER ANIMATION ─────────────────────────────────────────────────────────
+let countersStarted = false;
+function counterAnimation(){
+  if(countersStarted) return;
+  const statsSection = document.querySelector('.story-stats');
+  if(!statsSection) return;
+  const rect = statsSection.getBoundingClientRect();
+  if(rect.top < window.innerHeight * 0.8){
+    countersStarted = true;
+    document.querySelectorAll('.stat-num[data-count]').forEach(el => {
+      const target = el.dataset.count;
+      const isNum = !isNaN(target);
+      if(!isNum){ el.classList.add('count-reveal'); return; }
+      let start = 0;
+      const end = parseInt(target);
+      const duration = 1800;
+      const step = (end / duration) * 16;
+      const timer = setInterval(() => {
+        start = Math.min(start + step, end);
+        el.textContent = Math.floor(start) + (el.dataset.suffix || '+');
+        if(start >= end) clearInterval(timer);
+      }, 16);
+    });
+  }
+}
+
+// ── HORIZONTAL SCROLL SECTION ─────────────────────────────────────────────────
+function initHorizontalScroll(){
+  const track = document.querySelector('.h-scroll-track');
+  const section = document.querySelector('.h-scroll-section');
+  if(!track || !section) return;
+
+  const stickyHeight = track.scrollWidth - window.innerWidth + section.offsetHeight;
+  section.style.height = stickyHeight + 'px';
+
+  const stickyObserver = new IntersectionObserver(() => {}, {threshold: 0});
+
+  window.addEventListener('scroll', () => {
+    const rect = section.getBoundingClientRect();
+    if(rect.top <= 0 && rect.bottom >= window.innerHeight){
+      const progress = Math.abs(rect.top) / (section.offsetHeight - window.innerHeight);
+      const maxScroll = track.scrollWidth - window.innerWidth;
+      track.style.transform = `translateX(${-maxScroll * progress}px)`;
+    }
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Fade reveal for sections
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  document.querySelectorAll('.stagger-parent').forEach(el => staggerObserver.observe(el));
+
+  // Animate section titles
+  document.querySelectorAll('.section-title').forEach(el => {
+    el.classList.add('reveal');
+    revealObserver.observe(el);
+  });
+
+  // Hero entrance animation
+  setTimeout(() => {
+    document.querySelector('.hero-tag')?.classList.add('hero-in');
+    setTimeout(() => document.querySelector('.hero-name')?.classList.add('hero-in'), 300);
+    setTimeout(() => document.querySelector('.hero-tagline')?.classList.add('hero-in'), 600);
+    setTimeout(() => document.querySelector('.hero-scroll')?.classList.add('hero-in'), 900);
+  }, 200);
+
+  // Make cards stagger children
+  document.querySelectorAll('.skills-grid, .projects-grid, .story-stats').forEach(el => {
+    el.classList.add('stagger-parent');
+    el.querySelectorAll('.skill-card, .project-card, .stat-card').forEach(card => {
+      card.classList.add('reveal-child');
+    });
+    staggerObserver.observe(el);
+  });
+
+  initHorizontalScroll();
 });
 </script>
 </body>
